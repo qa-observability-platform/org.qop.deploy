@@ -1,0 +1,96 @@
+networks:
+  qop_network:
+    driver: bridge
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: qop_db
+      POSTGRES_USER: qop_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qop_password}
+    volumes:
+      - qop_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - qop_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qop_user -d qop_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Node.js API (port 4000) ─────────────────────────────────────────────────
+  nodeapi:
+    image: ravikumarsurya/qop-nodeapi:latest
+    environment:
+      # Database - points to postgres container on internal network
+      DATABASE_URL: postgresql://qop_user:${POSTGRES_PASSWORD:-qop_password}@postgres:5432/qop_db
+      QOP_DB_URL: postgresql://qop_user:${POSTGRES_PASSWORD:-qop_password}@postgres:5432/qop_db
+      NODE_ENV: production
+      QOP_NODEAPI_PORT: 4000
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-min-32-chars}
+      JWT_EXPIRES_IN: 15m
+      REFRESH_TOKEN_EXPIRES_IN: 7d
+      # CORS - frontend origin accessible from browser
+      CORS_ORIGIN: ${FRONTEND_URL:-http://localhost:3000}
+      # APP_URL is used to build invitation accept links sent via email
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      # WS_ENDPOINT and API_BASE_URL are returned to SDK reporters.
+      # Must be the HOST address so external test runners can reach them.
+      WS_ENDPOINT: ${QOP_API_URL:-http://localhost:4000}/ws/ingest
+      API_BASE_URL: ${QOP_API_URL:-http://localhost:4000}
+      # Python AI API - internal container name
+      PYTHON_API_URL: http://pythonapi:8000
+    ports:
+      - "4000:4000"
+    networks:
+      - qop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Python AI API (port 8000) ───────────────────────────────────────────────
+  pythonapi:
+    image: ravikumarsurya/qop-pythonapi:latest
+    environment:
+      DATABASE_URL: postgresql://qop_user:${POSTGRES_PASSWORD:-qop_password}@postgres:5432/qop_db
+      # AI provider keys (set in .env.docker - all optional, at least one needed for AI features)
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      PREFERRED_AI_PROVIDER: ${PREFERRED_AI_PROVIDER:-groq}
+    ports:
+      - "8000:8000"
+    networks:
+      - qop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Next.js Frontend (port 3000) ────────────────────────────────────────────
+  web:
+    image: ravikumarsurya/qop-web:latest
+    environment:
+      NEXT_PUBLIC_QOP_API_URL: ${QOP_API_URL:-http://localhost:4000}
+      NEXT_PUBLIC_QOP_WS_URL: ${QOP_WS_URL:-ws://localhost:4000}
+      NEXT_PUBLIC_PYTHON_API_URL: ${PYTHON_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_APP_URL: ${APP_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    networks:
+      - qop_network
+    depends_on:
+      - nodeapi
+    restart: unless-stopped
+
+volumes:
+  qop_postgres_data:
