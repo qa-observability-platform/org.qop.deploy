@@ -47,7 +47,34 @@ This pulls pre-built images from Docker Hub and starts 4 services:
 | Python AI API | 8000 | Flaky detection + AI analysis |
 | Web Dashboard | 3000 | Next.js frontend |
 
-### 4. Access the dashboard
+### 4. Verify everything is running
+
+Check all containers are healthy:
+```bash
+docker compose ps
+```
+
+Check the API and database are connected:
+```bash
+curl http://localhost:4000/ready
+# ✅ {"status":"ready","db":"ok"}
+# ❌ {"status":"unhealthy","db":"error"}  ← database not connected
+```
+
+Check API is alive (no DB needed):
+```bash
+curl http://localhost:4000/health
+# {"status":"ok"}
+```
+
+View logs if something is wrong:
+```bash
+docker compose logs nodeapi     # Node.js API logs
+docker compose logs postgres    # Database logs
+docker compose logs web         # Frontend logs
+```
+
+### 5. Access the dashboard
 
 Open [http://localhost:3000](http://localhost:3000) and create your account.
 
