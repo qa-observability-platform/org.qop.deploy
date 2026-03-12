@@ -80,10 +80,10 @@ services:
   web:
     image: ravikumarsurya/qop-web:latest
     environment:
-      NEXT_PUBLIC_QOP_API_URL: ${QOP_API_URL:-http://localhost:4000}
-      NEXT_PUBLIC_QOP_WS_URL: ${QOP_WS_URL:-ws://localhost:4000}
-      NEXT_PUBLIC_PYTHON_API_URL: ${PYTHON_API_URL:-http://localhost:8000}
-      NEXT_PUBLIC_APP_URL: ${APP_URL:-http://localhost:3000}
+      # Runtime config — no image rebuild needed when changing server URLs.
+      # Set QOP_API_URL and QOP_WS_URL in your .env.docker file.
+      QOP_API_URL: ${QOP_API_URL:-http://localhost:4000}
+      QOP_WS_URL: ${QOP_WS_URL:-ws://localhost:4000}
     ports:
       - "3000:3000"
     networks:
