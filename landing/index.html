@@ -617,7 +617,7 @@ function showChatScreen() {
   document.getElementById('key-setup').style.display = 'none';
   document.getElementById('chat-screen').style.display = 'flex';
   if (document.getElementById('chat-messages').children.length === 0) {
-    appendMessage('assistant', 'Hi! I\'m the QOP Assistant. Ask me anything about setting up QOP, the reporter SDKs, flaky test detection, or any other QOP feature.');
+    appendMessage('assistant', 'Hi! I\'m the QOP Assistant 🤖\n\nI can help you with:\n• 🐳 Setting up QOP with Docker\n• 🔌 Connecting Playwright, Pytest, Puppeteer, or Selenium reporters\n• 🔍 Flaky test detection & auto-quarantine\n• 📊 Test analytics & live execution monitoring\n• 🔑 API keys, organizations, and project setup\n\nWhat do you need help with?');
   }
   setTimeout(() => document.getElementById('chat-input').focus(), 100);
 }
