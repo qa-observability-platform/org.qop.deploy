@@ -34,9 +34,10 @@ Edit `.env.docker` and set:
 | `QOP_WS_URL` | WebSocket URL (e.g. `ws://your-server-ip:4000`) |
 | `GROQ_API_KEY` | (Optional) Groq API key for AI features — free at [console.groq.com](https://console.groq.com) |
 
-### 3. Start QOP
+### 3. Pull images & start QOP
 
 ```bash
+docker compose --env-file .env.docker pull
 docker compose --env-file .env.docker up -d
 ```
 
