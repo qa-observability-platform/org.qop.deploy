@@ -26,6 +26,8 @@ Edit `.env.docker` and set:
 
 | Variable | Description |
 |---|---|
+| `POSTGRES_DB` | Database name (e.g. `qop_db`) |
+| `POSTGRES_USER` | Database username (e.g. `qop_user`) |
 | `POSTGRES_PASSWORD` | Database password (choose a strong one) |
 | `JWT_SECRET` | JWT signing secret — run `openssl rand -hex 32` |
 | `QOP_API_URL` | Public URL of your server (e.g. `http://your-server-ip:4000`) |
