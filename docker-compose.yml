@@ -8,9 +8,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: qop_db
-      POSTGRES_USER: qop_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qop_password}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required - set it in .env.docker}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required - set it in .env.docker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required - set it in .env.docker}
     volumes:
       - qop_postgres_data:/var/lib/postgresql/data
     ports:
@@ -18,7 +18,7 @@ services:
     networks:
       - qop_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U qop_user -d qop_db"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -29,12 +29,12 @@ services:
     image: ravikumarsurya/qop-nodeapi:latest
     environment:
       # Database - points to postgres container on internal network
-      DATABASE_URL: postgresql://qop_user:${POSTGRES_PASSWORD:-qop_password}@postgres:5432/qop_db
-      QOP_DB_URL: postgresql://qop_user:${POSTGRES_PASSWORD:-qop_password}@postgres:5432/qop_db
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      QOP_DB_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       NODE_ENV: production
       QOP_NODEAPI_PORT: 4000
       # JWT
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-min-32-chars}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required - set it in .env.docker (min 32 chars)}
       JWT_EXPIRES_IN: 15m
       REFRESH_TOKEN_EXPIRES_IN: 7d
       # CORS - frontend origin accessible from browser
@@ -60,7 +60,7 @@ services:
   pythonapi:
     image: ravikumarsurya/qop-pythonapi:latest
     environment:
-      DATABASE_URL: postgresql://qop_user:${POSTGRES_PASSWORD:-qop_password}@postgres:5432/qop_db
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       # AI provider keys (set in .env.docker - all optional, at least one needed for AI features)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
