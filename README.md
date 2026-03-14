@@ -28,7 +28,7 @@ Edit `.env.docker` and set:
 |---|---|
 | `POSTGRES_DB` | Database name (e.g. `qop_db`) |
 | `POSTGRES_USER` | Database username (e.g. `qop_user`) |
-| `POSTGRES_PASSWORD` | Database password (choose a strong one) |
+| `POSTGRES_PASSWORD` | Database password — set once, never change after first run |
 | `JWT_SECRET` | JWT signing secret — run `openssl rand -hex 32` |
 | `QOP_API_URL` | Public URL of your server (e.g. `http://your-server-ip:4000`) |
 | `QOP_WS_URL` | WebSocket URL (e.g. `ws://your-server-ip:4000`) |
@@ -97,6 +97,26 @@ docker compose down
 ```
 
 > **Note:** Data is stored in a Docker volume (`qop_postgres_data`) and persists across restarts. To delete all data: `docker compose down -v`
+
+---
+
+## Troubleshooting
+
+**`password authentication failed for user "qop_user"`**
+
+Your `POSTGRES_PASSWORD` in `.env.docker` doesn't match what the database was initialized with. Reset with:
+```bash
+docker compose --env-file .env.docker down -v
+docker compose --env-file .env.docker up -d
+```
+> This wipes all data and starts fresh with the current password.
+
+**`required variable POSTGRES_PASSWORD is missing`**
+
+You ran `docker compose up` without the env file flag. Always use:
+```bash
+docker compose --env-file .env.docker up -d
+```
 
 ---
 
