@@ -122,24 +122,96 @@ docker compose --env-file .env.docker up -d
 
 ## Integrating Test Frameworks
 
-Install the reporter for your framework:
+### Playwright
 
-**Playwright**
 ```bash
 npm install @qa-observability-platform/playwright
 ```
 
-**Puppeteer / Jest**
+Add the reporter to `playwright.config.ts`:
+
+```ts
+reporter: [
+  ['@qa-observability-platform/playwright'],
+  ['list'],
+],
+```
+
+Create a `.env` file in your project root:
+
+```env
+QOP_WS_URL=ws://YOUR_SERVER_IP:4000/ws/ingest
+QOP_API_KEY=your-api-key
+QOP_PROJECT_KEY=your-project-key
+QOP_APP_KEY=your-app-name
+```
+
+Run your tests:
+
+```bash
+npx playwright test
+```
+
+---
+
+### Puppeteer / Jest
+
 ```bash
 npm install @qa-observability-platform/puppeteer
 ```
 
-**Pytest**
+Add to your Jest config (`jest.config.js`):
+
+```js
+reporters: [
+  'default',
+  '@qa-observability-platform/puppeteer',
+],
+```
+
+Create a `.env` file:
+
+```env
+QOP_WS_URL=ws://YOUR_SERVER_IP:4000/ws/ingest
+QOP_API_KEY=your-api-key
+QOP_PROJECT_KEY=your-project-key
+QOP_APP_KEY=your-app-name
+```
+
+Run your tests:
+
+```bash
+npm test
+```
+
+---
+
+### Pytest
+
 ```bash
 pip install qa-observability-platform-pytest
 ```
 
-**Selenium / TestNG** — coming soon via JitPack.
+The plugin registers automatically. Create a `.env` file:
+
+```env
+QOP_WS_URL=ws://YOUR_SERVER_IP:4000/ws/ingest
+QOP_API_KEY=your-api-key
+QOP_PROJECT_KEY=your-project-key
+QOP_APP_KEY=your-app-name
+```
+
+Run your tests:
+
+```bash
+pytest
+```
+
+> **Where to get your API key:** Log in to the QOP dashboard → Settings → API Keys → Generate Key.
+
+---
+
+### Selenium / TestNG — coming soon via JitPack.
 
 ---
 
